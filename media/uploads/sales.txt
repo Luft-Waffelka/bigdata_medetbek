@@ -1,0 +1,41 @@
+order_id	product	category	city	quantity	unit_price	total_amount	payment_method	status	order_date
+1001	Laptop	Electronics	Almaty	1	350000	350000	Card	Delivered	2024-01-05
+1002	Phone	Electronics	Astana	2	180000	360000	Cash	Delivered	2024-01-07
+1003	Headphones	Electronics	Almaty	1	45000	45000	Card	Delivered	2024-01-08
+1004	T-Shirt	Clothing	Shymkent	3	8000	24000	Cash	Delivered	2024-01-10
+1005	Laptop	Electronics	Almaty	1	350000	350000	Card	Delivered	2024-01-05
+1006	Jeans	Clothing	Astana	2	25000	50000	Card	Delivered	2024-01-12
+1007	Refrigerator	Appliances	Karaganda	1	280000		Cash	Delivered	2024-01-13
+1008	Tablet	Electronics	Almaty	1	220000	220000	Card	Returned	2024-01-15
+1009	Jacket	Clothing	Shymkent	1	55000	55000	Cash	Delivered	2024-01-16
+1010	Washing Machine	Appliances	Astana	1	320000	320000	Card	Delivered	2024-01-18
+1011	Phone	Electronics	Almaty	1	180000	180000	Cash	Delivered	2024-01-19
+1012	Sneakers	Clothing	Almaty	2	30000	60000	Card	Delivered	2024-01-20
+1013	Microwave	Appliances	Karaganda	1	95000	95000	Cash	Delivered	2024-01-21
+1014	Laptop	Electronics	Astana	1	350000	350000	Card	Delivered	2024-01-22
+1015	Headphones	Electronics	Shymkent		45000		Card	Pending	2024-01-23
+1016	Dress	Clothing	Almaty	4	18000	72000	Cash	Delivered	2024-01-24
+1017	TV	Appliances	Astana	1	450000	450000	Card	Delivered	2024-01-25
+1018	Tablet	Electronics	Almaty	2	220000	440000	Card	Delivered	2024-01-26
+1019	Jeans	Clothing	Karaganda	1	25000	25000	Cash	Returned	2024-01-27
+1020	Phone	Electronics	Almaty	3	180000	540000	Card	Delivered	2024-01-28
+1021	Refrigerator	Appliances	Shymkent	1	280000	280000	Cash	Delivered	2024-01-29
+1022	T-Shirt	Clothing	Astana	5	8000	40000	Cash	Delivered	2024-01-30
+1023	Laptop	Electronics	Almaty	1	350000	350000	Card	Pending	2024-01-31
+1024	Sneakers	Clothing	Almaty	1	30000	30000	Card	Delivered	2024-02-01
+1025	Microwave	Appliances	Astana	1	95000	95000	Card	Delivered	2024-02-02
+1026	Phone	Electronics	Karaganda	1	180000	180000	Cash	Delivered	2024-02-03
+1027	Jacket	Clothing	Almaty	2	55000	110000	Card	Delivered	2024-02-04
+1028	TV	Appliances	Shymkent	1		450000	Cash	Delivered	2024-02-05
+1029	Tablet	Electronics	Astana	1	220000	220000	Card	Delivered	2024-02-06
+1030	Headphones	Electronics	Almaty	3	45000	135000	Cash	Delivered	2024-02-07
+1031	Dress	Clothing	Karaganda	2	18000	36000	Card	Delivered	2024-02-08
+1032	Washing Machine	Appliances	Almaty	1	320000	320000	Card	Delivered	2024-02-09
+1033	Laptop	Electronics	Astana	1	350000	350000	Card	Delivered	2024-02-10
+1034	Phone	Electronics	Almaty	2	180000	360000	Cash	Returned	2024-02-11
+1035	T-Shirt	Clothing	Shymkent	4	8000	32000	Cash	Delivered	2024-02-12
+1036	Jeans	Clothing	Almaty	1	25000	25000	Card	Delivered	2024-02-13
+1037	Refrigerator	Appliances	Astana	1	280000	280000	Cash	Delivered	2024-02-14
+1038	Sneakers	Clothing	Karaganda	2	30000	60000	Cash	Delivered	2024-02-15
+1039	Laptop	Electronics	Almaty	1	350000	350000	Card	Delivered	2024-01-05
+1040	Microwave	Appliances	Almaty	2	95000	190000	Card	Delivered	2024-02-17

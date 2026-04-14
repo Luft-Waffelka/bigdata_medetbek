@@ -81,6 +81,11 @@ class ProcessingResult(models.Model):
     # Өңдеу күні
     processed_at = models.DateTimeField(auto_now_add=True)
 
+    # Деректерді тазалау алдындағы және одан кейінгі қорытындылар
+    cleaning_before = models.JSONField(null=True, blank=True)
+    cleaning_after = models.JSONField(null=True, blank=True)
+    cleaning_diff = models.JSONField(null=True, blank=True)
+
     # Қате болса хабарлама
     error_message = models.TextField(blank=True)
 

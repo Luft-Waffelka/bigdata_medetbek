@@ -1,0 +1,51 @@
+id,name,city,age,gpa,attendance_pct,scholarship,department,gender,grade
+1,Aizat Bekova,Almaty,20,3.8,92.0,True,Computer Science,F,A
+2,Nurlan Seitkali,Astana,22,2.9,78.5,False,Mathematics,M,C
+3,Dana Akhmetova,Shymkent,21,3.5,88.0,True,Physics,F,B
+4,Marat Ospanov,Almaty,23,,74.0,False,Computer Science,M,C
+5,Ainur Bekova,Almaty,20,3.8,92.0,True,Computer Science,F,A
+6,Zhanar Suleimanova,Karaganda,22,3.1,81.0,False,Mathematics,F,B
+7,Temirlan Akhanov,Almaty,21,2.5,65.0,False,Economics,M,D
+8,Madina Yusupova,Astana,20,3.9,95.5,True,Computer Science,F,A
+9,Arman Bekzhanov,Shymkent,24,3.2,,False,Physics,M,B
+10,Saltanat Nurmagambetova,Almaty,22,2.7,70.0,False,Mathematics,F,C
+11,Damir Serikbayev,Astana,21,3.6,89.0,True,Computer Science,M,A
+12,Gulnara Mamytbekova,Bishkek,23,2.4,60.5,False,Economics,F,D
+13,Aset Karimov,Almaty,20,3.7,91.0,True,Physics,M,A
+14,Zhanna Dosova,Karaganda,22,,85.0,True,Mathematics,F,B
+15,Ruslan Nurbekov,Astana,25,2.8,72.0,False,Economics,M,C
+16,Aizat Bekova,Almaty,20,3.8,92.0,True,Computer Science,F,A
+17,Kamila Sultanova,Almaty,21,3.4,87.5,True,Computer Science,F,B
+18,Berik Zhansekov,Shymkent,22,3.0,79.0,False,Mathematics,M,C
+19,Nazgul Abenova,Astana,20,3.8,94.0,True,Physics,F,A
+20,Dias Mukanov,Almaty,23,2.6,68.0,False,Economics,M,D
+21, Aibek Sadykov,Karaganda,22,3.3,83.0,False,Computer Science,M,B
+22,Aliya Kenzhebekova,Almaty,21,3.6,90.0,True,Mathematics,F,A
+23,Serik Baimagambetov,Astana,24,2.9,75.0,False,Economics,M,C
+24,Maral Dzhaksybekova,Shymkent,20,,88.5,True,Computer Science,F,B
+25,Timur Akhmetov,Almaty,22,3.1,80.0,False,Physics,M,B
+26,Bibigul Seitkalieva,Karaganda,21,2.3,58.0,False,Economics,F,D
+27,Askar Nurlanovich,Almaty,23,3.5,86.0,True,Mathematics,M,B
+28,Dinara Bekova,Astana,20,3.9,96.0,True,Computer Science,F,A
+29,Yerlan Ospanov,Shymkent,22,2.7,71.0,False,Physics,M,C
+30,Zarina Suleimenova,Almaty,21,3.4,,True,Mathematics,F,B
+31,Nurlan Seitkali,Astana,22,2.9,78.5,False,Mathematics,M,C
+32,Saniya Kasymova,Almaty,20,3.7,93.0,True,Computer Science,F,A
+33,Artur Popov,Karaganda,25,2.5,64.0,False,Economics,M,D
+34,Anar Bisengalieva,Astana,22,3.2,82.0,False,Physics,F,B
+35,Meiram Dzhaksybekov,Almaty,21,3.6,88.0,True,Computer Science,M,A
+36,Fatima Urazova, Shymkent ,23,,77.0,False,Mathematics,F,C
+37,Daniyar Seilov,Almaty,20,3.8,92.5,True,Computer Science,M,A
+38,Akmaral Nurbekova,Astana,22,2.6,67.0,False,Economics,F,D
+39,Bolat Karimov,Karaganda,21,3.3,84.0,False,Physics,M,B
+40,Ainur Mamytova,Almaty,24,3.0,78.0,True,Mathematics,F,C
+41,Marat Ospanov,Almaty,23,,74.0,False,Computer Science,M,C
+42,Togzhan Bekova,Shymkent,20,3.5,89.0,True,Computer Science,F,B
+43,Yerzhan Seitkali,Astana,22,2.8,73.0,False,Physics,M,C
+44,Alua Dzhaksybekova,Almaty,21,3.7,91.0,True,Economics,F,A
+45,Kanat Nurmagambetov,Karaganda,23,3.1,,False,Mathematics,M,B
+46,Moldir Akhanova,Astana,20,3.9,97.0,True,Computer Science,F,A
+47,Azamat Bekzhanov,Shymkent,22,2.4,61.0,False,Economics,M,D
+48,Aizat Bekova,Almaty,20,3.8,92.0,True,Computer Science,F,A
+49,Nurgul Sultanova,Almaty,21,3.4,85.5,True,Physics,F,B
+50,Saken Nurbekov,Astana,25,2.7,70.0,False,Mathematics,M,C

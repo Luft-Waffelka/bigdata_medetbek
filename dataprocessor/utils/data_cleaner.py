@@ -39,7 +39,12 @@ def get_shape(df: pd.DataFrame) -> dict:
     """
     # ▼▼▼ КОДТЫ ОСЫДАН БАСТАҢЫЗ ▼▼▼
 
-    raise NotImplementedError("get_shape() функциясын іске асырыңыз!")
+    row_count, column_count = df.shape
+    return {
+        'row_count': int(row_count),
+        'column_count': int(column_count),
+        'column_names': df.columns.tolist(),
+    }
 
     # ▲▲▲ КОДТЫ ОСЫМЕН АЯҚТАҢЫЗ ▲▲▲
 
@@ -71,14 +76,26 @@ def get_null_info(df: pd.DataFrame) -> dict:
     """
     # ▼▼▼ КОДТЫ ОСЫДАН БАСТАҢЫЗ ▼▼▼
 
-    raise NotImplementedError("get_null_info() функциясын іске асырыңыз!")
+    null_series = df.isnull().sum()
+    null_counts = null_series.to_dict()
+    total_nulls = int(null_series.sum())
+    row_count = len(df)
+    null_percent = {
+        col: round((count / row_count) * 100, 2) if row_count > 0 else 0.0
+        for col, count in null_counts.items()
+    }
+    return {
+        'null_counts': null_counts,
+        'total_nulls': total_nulls,
+        'null_percent': null_percent,
+    }
 
     # ▲▲▲ КОДТЫ ОСЫМЕН АЯҚТАҢЫЗ ▲▲▲
 
 
 # ═══════════════════════════════════════════════════════════════════════
 # 3. САНДЫҚ БАҒАНДАР СТАТИСТИКАСЫ
-# ═══════════════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════
 
 def get_numeric_stats(df: pd.DataFrame) -> dict:
     """
@@ -106,7 +123,21 @@ def get_numeric_stats(df: pd.DataFrame) -> dict:
     """
     # ▼▼▼ КОДТЫ ОСЫДАН БАСТАҢЫЗ ▼▼▼
 
-    raise NotImplementedError("get_numeric_stats() функциясын іске асырыңыз!")
+    numeric_df = df.select_dtypes(include='number')
+    stats = {}
+    for col in numeric_df.columns:
+        col_min = numeric_df[col].min()
+        col_max = numeric_df[col].max()
+        col_mean = numeric_df[col].mean()
+        stats[col] = {
+            'min': round(float(col_min), 2) if pd.notna(col_min) else None,
+            'max': round(float(col_max), 2) if pd.notna(col_max) else None,
+            'mean': round(float(col_mean), 2) if pd.notna(col_mean) else None,
+        }
+    return {
+        'stats': stats,
+        'numeric_columns': numeric_df.columns.tolist(),
+    }
 
     # ▲▲▲ КОДТЫ ОСЫМЕН АЯҚТАҢЫЗ ▲▲▲
 
@@ -145,7 +176,16 @@ def get_top_values(df: pd.DataFrame, top_n: int = 5) -> dict:
     """
     # ▼▼▼ КОДТЫ ОСЫДАН БАСТАҢЫЗ ▼▼▼
 
-    raise NotImplementedError("get_top_values() функциясын іске асырыңыз!")
+    top_values = {}
+    for col in df.columns:
+        counts = df[col].value_counts(dropna=False).head(top_n)
+        top_values[col] = [
+            {'value': idx, 'count': int(count)}
+            for idx, count in counts.items()
+        ]
+    return {
+        'top_values': top_values,
+    }
 
     # ▲▲▲ КОДТЫ ОСЫМЕН АЯҚТАҢЫЗ ▲▲▲
 
@@ -175,10 +215,25 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     """
     # ▼▼▼ КОДТЫ ОСЫДАН БАСТАҢЫЗ ▼▼▼
 
-    # Мысал (студент толықтырады):
     cleaned_df = df.copy()
 
-    # TODO: тазалау операцияларын қосыңыз
+    # 1) Баған атауларын кіші әріпке келтіру
+    cleaned_df.columns = cleaned_df.columns.str.lower()
+
+    # 2) Қайталанатын жолдарды жою
+    cleaned_df = cleaned_df.drop_duplicates().reset_index(drop=True)
+
+    # 3) Мәтіндік бағандардағы айналасындағы бос орындарды жою
+    text_columns = cleaned_df.select_dtypes(include=['object', 'string']).columns
+    for col in text_columns:
+        cleaned_df[col] = cleaned_df[col].astype('string').str.strip()
+
+    # 4) Сандық бағандардағы бос мәндерді бағандық орташа мәнмен толтыру
+    numeric_columns = cleaned_df.select_dtypes(include='number').columns
+    for col in numeric_columns:
+        if cleaned_df[col].isna().any():
+            mean_value = cleaned_df[col].mean()
+            cleaned_df[col] = cleaned_df[col].fillna(mean_value)
 
     return cleaned_df
 

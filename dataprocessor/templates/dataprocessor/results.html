@@ -20,6 +20,74 @@
 </div>
 {% else %}
 
+{% if result.cleaning_before and result.cleaning_after %}
+<div class="card mb-4 shadow-sm">
+    <div class="card-header">🧹 Деректерді тазалау — дейін және одан кейін</div>
+    <div class="card-body p-0">
+        <table class="table table-sm table-hover mb-0 table-result">
+            <thead>
+                <tr>
+                    <th>Объект</th>
+                    <th>До</th>
+                    <th>После</th>
+                    <th>Изменение</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Жолдар</strong></td>
+                    <td>{{ result.cleaning_before.shape.row_count }}</td>
+                    <td>{{ result.cleaning_after.shape.row_count }}</td>
+                    <td>{{ result.cleaning_after.shape.row_count|add:-result.cleaning_before.shape.row_count }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Бағандар</strong></td>
+                    <td>{{ result.cleaning_before.shape.column_count }}</td>
+                    <td>{{ result.cleaning_after.shape.column_count }}</td>
+                    <td>{{ result.cleaning_after.shape.column_count|add:-result.cleaning_before.shape.column_count }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Null саны</strong></td>
+                    <td>{{ result.cleaning_before.null_info.total_nulls }}</td>
+                    <td>{{ result.cleaning_after.null_info.total_nulls }}</td>
+                    <td>{{ result.cleaning_after.null_info.total_nulls|add:-result.cleaning_before.null_info.total_nulls }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+{% if result.cleaning_diff %}
+<div class="card mb-4 shadow-sm">
+    <div class="card-header">🔧 Қай өзгерістер болды</div>
+    <div class="card-body p-0">
+        <table class="table table-sm table-hover mb-0 table-result">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Объект</th>
+                    <th>Сырт</th>
+                    <th>Ішінде</th>
+                    <th>Ескерту</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in result.cleaning_diff %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ item.field|default:item.object }}</td>
+                    <td>{{ item.before|default:'—' }}</td>
+                    <td>{{ item.after|default:'—' }}</td>
+                    <td>{{ item.note }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
 <!-- ── Жалпы статистика карточкалары ── -->
 <div class="row g-3 mb-4">
 
