@@ -11,6 +11,7 @@ Views — HTTP сұраулар өңдеушілері.
 
 import time
 import os
+import json
 import pandas as pd
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
@@ -33,34 +34,24 @@ from .utils.data_cleaner import (
 
 def build_cleaning_diff(original_df, cleaned_df):
     diff = []
-    normalized_before = original_df.copy()
-    normalized_before.columns = normalized_before.columns.str.lower()
+    before = original_df.copy()
+    before.columns = before.columns.str.lower()
+    after = cleaned_df.copy()
 
-    # Column renames
-    for orig_col, clean_col in zip(original_df.columns, normalized_before.columns):
-        if orig_col != clean_col:
+    # Обрабатываем переименование колонок
+    for orig_col, clean_col in zip(original_df.columns, after.columns):
+        if orig_col.lower() == clean_col and orig_col != clean_col:
             diff.append({
                 'object': 'column name',
                 'field': orig_col,
+                'row': None,
                 'before': orig_col,
                 'after': clean_col,
                 'note': 'Column name lowercased',
             })
 
-    # Duplicate rows removed
-    duplicate_removed = len(normalized_before) - len(cleaned_df)
-    if duplicate_removed > 0:
-        diff.append({
-            'object': 'rows',
-            'field': None,
-            'before': len(normalized_before),
-            'after': len(cleaned_df),
-            'note': f'{duplicate_removed} duplicate row(s) removed',
-        })
-
-    before_unique = normalized_before.drop_duplicates(keep='first').reset_index(drop=True)
-    after_reset = cleaned_df.reset_index(drop=True)
-    compare_rows = min(len(before_unique), len(after_reset))
+    # Сравнение строк до и после
+    min_rows = min(len(before), len(after))
 
     def normalize_value(value):
         if pd.isna(value):
@@ -74,37 +65,51 @@ def build_cleaning_diff(original_df, cleaned_df):
             return str(value)
         return value
 
-    for col in after_reset.columns:
-        if col not in before_unique.columns:
-            continue
-        for row_idx in range(compare_rows):
-            before_value = before_unique[col].iloc[row_idx]
-            after_value = after_reset[col].iloc[row_idx]
-            if pd.isna(before_value) and pd.isna(after_value):
+    def values_equal(a, b):
+        if pd.isna(a) and pd.isna(b):
+            return True
+        return a == b
+
+    for row_idx in range(min_rows):
+        for col in after.columns:
+            if col not in before.columns:
                 continue
-            if before_value == after_value:
+            before_value = before.at[before.index[row_idx], col]
+            after_value = after.at[after.index[row_idx], col]
+            if values_equal(before_value, after_value):
                 continue
 
-            note = 'Changed value'
+            note = 'Значение изменено'
             if isinstance(before_value, str) and isinstance(after_value, str) and before_value.strip() == after_value:
-                note = 'Whitespace trimmed'
+                note = 'Удалены лишние пробелы'
             elif pd.isna(before_value) and not pd.isna(after_value):
-                note = 'Missing value filled'
+                note = 'Пустое значение заполнено'
             elif not pd.isna(before_value) and pd.isna(after_value):
-                note = 'Value removed'
+                note = 'Значение удалено'
 
             diff.append({
-                'object': 'cell',
+                'object': f'row {before.index[row_idx] + 1}',
                 'field': col,
-                'row': row_idx + 1,
+                'row': before.index[row_idx] + 1,
                 'before': normalize_value(before_value),
                 'after': normalize_value(after_value),
                 'note': note,
             })
-            if len(diff) >= 20:
+            if len(diff) >= 30:
                 break
-        if len(diff) >= 20:
+        if len(diff) >= 30:
             break
+
+    removed_rows = len(before) - len(after)
+    if removed_rows > 0:
+        diff.insert(0, {
+            'object': 'rows',
+            'field': None,
+            'row': None,
+            'before': len(before),
+            'after': len(after),
+            'note': f'{removed_rows} duplicate row(s) removed',
+        })
 
     return diff
 
@@ -276,11 +281,14 @@ def results_view(request, file_id: int):
             'nulls': result.cleaning_after['null_info']['total_nulls'] - result.cleaning_before['null_info']['total_nulls'],
         }
 
+    stats_json = json.dumps(result.numeric_stats or {}) if result.numeric_stats is not None else '{}'
+
     context = {
         'file_record': file_record,
         'result': result,
         'download_form': ProcessingOptionsForm(),
         'cleaning_changes': cleaning_changes,
+        'stats_json': stats_json,
     }
     return render(request, 'dataprocessor/results.html', context)
 

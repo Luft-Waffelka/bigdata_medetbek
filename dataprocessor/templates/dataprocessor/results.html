@@ -21,39 +21,34 @@
 {% else %}
 
 {% if result.cleaning_before and result.cleaning_after %}
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card mb-3 shadow-sm border-primary">
+            <div class="card-header bg-primary text-white">📌 До очистки</div>
+            <div class="card-body">
+                <p class="mb-2"><strong>Жолдар:</strong> {{ result.cleaning_before.shape.row_count }}</p>
+                <p class="mb-2"><strong>Бағандар:</strong> {{ result.cleaning_before.shape.column_count }}</p>
+                <p class="mb-0"><strong>Null саны:</strong> {{ result.cleaning_before.null_info.total_nulls }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card mb-3 shadow-sm border-success">
+            <div class="card-header bg-success text-white">✅ После очистки</div>
+            <div class="card-body">
+                <p class="mb-2"><strong>Жолдар:</strong> {{ result.cleaning_after.shape.row_count }}</p>
+                <p class="mb-2"><strong>Бағандар:</strong> {{ result.cleaning_after.shape.column_count }}</p>
+                <p class="mb-0"><strong>Null саны:</strong> {{ result.cleaning_after.null_info.total_nulls }}</p>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="card mb-4 shadow-sm">
-    <div class="card-header">🧹 Деректерді тазалау — дейін және одан кейін</div>
-    <div class="card-body p-0">
-        <table class="table table-sm table-hover mb-0 table-result">
-            <thead>
-                <tr>
-                    <th>Объект</th>
-                    <th>До</th>
-                    <th>После</th>
-                    <th>Изменение</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><strong>Жолдар</strong></td>
-                    <td>{{ result.cleaning_before.shape.row_count }}</td>
-                    <td>{{ result.cleaning_after.shape.row_count }}</td>
-                    <td>{{ result.cleaning_after.shape.row_count|add:-result.cleaning_before.shape.row_count }}</td>
-                </tr>
-                <tr>
-                    <td><strong>Бағандар</strong></td>
-                    <td>{{ result.cleaning_before.shape.column_count }}</td>
-                    <td>{{ result.cleaning_after.shape.column_count }}</td>
-                    <td>{{ result.cleaning_after.shape.column_count|add:-result.cleaning_before.shape.column_count }}</td>
-                </tr>
-                <tr>
-                    <td><strong>Null саны</strong></td>
-                    <td>{{ result.cleaning_before.null_info.total_nulls }}</td>
-                    <td>{{ result.cleaning_after.null_info.total_nulls }}</td>
-                    <td>{{ result.cleaning_after.null_info.total_nulls|add:-result.cleaning_before.null_info.total_nulls }}</td>
-                </tr>
-            </tbody>
-        </table>
+    <div class="card-header">🔧 Өзгерістер</div>
+    <div class="card-body">
+        <p class="mb-2"><strong>Жолдар:</strong> {{ cleaning_changes.rows }}</p>
+        <p class="mb-2"><strong>Бағандар:</strong> {{ cleaning_changes.columns }}</p>
+        <p class="mb-0"><strong>Null саны:</strong> {{ cleaning_changes.nulls }}</p>
     </div>
 </div>
 {% endif %}
@@ -66,9 +61,10 @@
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>Объект</th>
-                    <th>Сырт</th>
-                    <th>Ішінде</th>
+                    <th>Жол</th>
+                    <th>Өріc</th>
+                    <th>До</th>
+                    <th>После</th>
                     <th>Ескерту</th>
                 </tr>
             </thead>
@@ -76,9 +72,10 @@
                 {% for item in result.cleaning_diff %}
                 <tr>
                     <td>{{ forloop.counter }}</td>
+                    <td>{{ item.row|default:'—' }}</td>
                     <td>{{ item.field|default:item.object }}</td>
-                    <td>{{ item.before|default:'—' }}</td>
-                    <td>{{ item.after|default:'—' }}</td>
+                    <td><code>"{{ item.before|default:'—' }}"</code></td>
+                    <td><code>"{{ item.after|default:'—' }}"</code></td>
                     <td>{{ item.note }}</td>
                 </tr>
                 {% endfor %}
@@ -221,7 +218,7 @@
 {% if result.numeric_stats %}
 <script>
 // Chart.js — сандық бағандар үшін bar chart
-const statsData = {{ result.numeric_stats|safe }};
+const statsData = {{ stats_json|safe }};
 const labels = Object.keys(statsData.stats || {});
 const minData  = labels.map(k => statsData.stats[k].min);
 const maxData  = labels.map(k => statsData.stats[k].max);
