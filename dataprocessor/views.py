@@ -32,6 +32,48 @@ from .utils.data_cleaner import (
 )
 
 
+def normalize_shape(shape_data):
+    """
+    Shape деректерін нормализациялайды.
+    Егер tuple болса, dict түрге айналдырады.
+    
+    Args:
+        shape_data: dict немесе tuple
+        
+    Returns:
+        dict: {'row_count': int, 'column_count': int, 'column_names': list}
+    """
+    if isinstance(shape_data, dict):
+        return shape_data
+    elif isinstance(shape_data, tuple) and len(shape_data) >= 2:
+        # Ескі формат: (row_count, column_count)
+        return {
+            'row_count': int(shape_data[0]),
+            'column_count': int(shape_data[1]),
+            'column_names': []
+        }
+    else:
+        # Қауіпсіз әдепкі
+        return {
+            'row_count': 0,
+            'column_count': 0,
+            'column_names': []
+        }
+
+
+def safe_get_int(value):
+    """
+    Кез келген мәнді қауіпсіз түрде int-ке айналдырады.
+    Tuple, str немесе басқа типтан int ала алады.
+    """
+    try:
+        if isinstance(value, (tuple, list)):
+            return int(value[0]) if value else 0
+        return int(value) if value is not None else 0
+    except (ValueError, TypeError, IndexError):
+        return 0
+
+
 def build_cleaning_diff(original_df, cleaned_df):
     diff = []
     before = original_df.copy()
@@ -201,12 +243,20 @@ def process_view(request, file_id: int):
 
                 # ТЗ 2.2 — Сандық статистика
                 if opts.get('show_stats'):
-                    result_data['numeric_stats'] = get_numeric_stats(cleaned_df)
+                    try:
+                        result_data['numeric_stats'] = get_numeric_stats(cleaned_df)
+                    except Exception as stats_error:
+                        print(f"⚠️ Numeric stats қатесі: {stats_error}")
+                        result_data['numeric_stats'] = {'stats': {}, 'numeric_columns': []}
 
                 # ТЗ 2.2 — Top-N мәндер
                 if opts.get('show_top_values'):
-                    top_n = opts.get('top_n') or 5
-                    result_data['top_values'] = get_top_values(cleaned_df, top_n=top_n)
+                    try:
+                        top_n = opts.get('top_n') or 5
+                        result_data['top_values'] = get_top_values(cleaned_df, top_n=top_n)
+                    except Exception as top_error:
+                        print(f"⚠️ Top values қатесі: {top_error}")
+                        result_data['top_values'] = {'top_values': {}}
 
                 elapsed = time.time() - start_time
 
@@ -275,10 +325,18 @@ def results_view(request, file_id: int):
 
     cleaning_changes = None
     if result.cleaning_before and result.cleaning_after:
+        # Shape деректерін нормализациялау (ескі форматтан қорғану)
+        before_shape = normalize_shape(result.cleaning_before.get('shape', {}))
+        after_shape = normalize_shape(result.cleaning_after.get('shape', {}))
+        
+        # Null мәндерін қауіпсіз түрде өңдеу
+        before_nulls = safe_get_int(result.cleaning_before.get('null_info', {}).get('total_nulls', 0))
+        after_nulls = safe_get_int(result.cleaning_after.get('null_info', {}).get('total_nulls', 0))
+        
         cleaning_changes = {
-            'rows': result.cleaning_after['shape']['row_count'] - result.cleaning_before['shape']['row_count'],
-            'columns': result.cleaning_after['shape']['column_count'] - result.cleaning_before['shape']['column_count'],
-            'nulls': result.cleaning_after['null_info']['total_nulls'] - result.cleaning_before['null_info']['total_nulls'],
+            'rows': after_shape['row_count'] - before_shape['row_count'],
+            'columns': after_shape['column_count'] - before_shape['column_count'],
+            'nulls': after_nulls - before_nulls,
         }
 
     stats_json = json.dumps(result.numeric_stats or {}) if result.numeric_stats is not None else '{}'

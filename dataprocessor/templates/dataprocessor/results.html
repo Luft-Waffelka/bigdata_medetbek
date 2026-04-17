@@ -4,13 +4,11 @@
 
 {% block content %}
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4>📊 Өңдеу нәтижесі: <em>{{ file_record.original_name }}</em></h4>
-    <div class="btn-group">
-        <a href="{% url 'download' file_record.pk %}?format=csv"
-           class="btn btn-outline-primary btn-sm">⬇ CSV</a>
-        <a href="{% url 'download' file_record.pk %}?format=json"
-           class="btn btn-outline-secondary btn-sm">⬇ JSON</a>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4>Өңдеу нәтижесі: {{ file_record.original_name }}</h4>
+    <div>
+        <a href="{% url 'download' file_record.pk %}?format=csv" class="btn btn-outline-primary btn-sm">CSV</a>
+        <a href="{% url 'download' file_record.pk %}?format=json" class="btn btn-outline-secondary btn-sm">JSON</a>
     </div>
 </div>
 
@@ -23,46 +21,105 @@
 {% if result.cleaning_before and result.cleaning_after %}
 <div class="row g-3 mb-4">
     <div class="col-md-6">
-        <div class="card mb-3 shadow-sm border-primary">
-            <div class="card-header bg-primary text-white">📌 До очистки</div>
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <strong>До очистки</strong>
+            </div>
             <div class="card-body">
-                <p class="mb-2"><strong>Жолдар:</strong> {{ result.cleaning_before.shape.row_count }}</p>
-                <p class="mb-2"><strong>Бағандар:</strong> {{ result.cleaning_before.shape.column_count }}</p>
-                <p class="mb-0"><strong>Null саны:</strong> {{ result.cleaning_before.null_info.total_nulls }}</p>
+                <p><strong>Жолдар:</strong> {{ result.cleaning_before.shape.row_count }}</p>
+                <p><strong>Бағандар:</strong> {{ result.cleaning_before.shape.column_count }}</p>
+                <p><strong>Null саны:</strong> {{ result.cleaning_before.null_info.total_nulls }}</p>
             </div>
         </div>
     </div>
+
     <div class="col-md-6">
-        <div class="card mb-3 shadow-sm border-success">
-            <div class="card-header bg-success text-white">✅ После очистки</div>
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <strong>После очистки</strong>
+            </div>
             <div class="card-body">
-                <p class="mb-2"><strong>Жолдар:</strong> {{ result.cleaning_after.shape.row_count }}</p>
-                <p class="mb-2"><strong>Бағандар:</strong> {{ result.cleaning_after.shape.column_count }}</p>
-                <p class="mb-0"><strong>Null саны:</strong> {{ result.cleaning_after.null_info.total_nulls }}</p>
+                <p><strong>Жолдар:</strong> {{ result.cleaning_after.shape.row_count }}</p>
+                <p><strong>Бағандар:</strong> {{ result.cleaning_after.shape.column_count }}</p>
+                <p><strong>Null саны:</strong> {{ result.cleaning_after.null_info.total_nulls }}</p>
             </div>
         </div>
     </div>
 </div>
-<div class="card mb-4 shadow-sm">
-    <div class="card-header">🔧 Өзгерістер</div>
-    <div class="card-body">
-        <p class="mb-2"><strong>Жолдар:</strong> {{ cleaning_changes.rows }}</p>
-        <p class="mb-2"><strong>Бағандар:</strong> {{ cleaning_changes.columns }}</p>
-        <p class="mb-0"><strong>Null саны:</strong> {{ cleaning_changes.nulls }}</p>
+
+{% if result.cleaning_before.numeric_stats %}
+<div class="card mb-4">
+    <div class="card-header">
+        <strong>Числовая статистика (До очистки)</strong>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-sm table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Признак</th>
+                    <th>Min</th>
+                    <th>Max</th>
+                    <th>Mean</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for field, stats in result.cleaning_before.numeric_stats.items %}
+                <tr>
+                    <td>{{ field }}</td>
+                    <td>{{ stats.min|default:'—' }}</td>
+                    <td>{{ stats.max|default:'—' }}</td>
+                    <td>{{ stats.mean|default:'—' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
 {% endif %}
 
+{% if result.cleaning_after.numeric_stats %}
+<div class="card mb-4">
+    <div class="card-header">
+        <strong>Числовая статистика (После очистки)</strong>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-sm table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Признак</th>
+                    <th>Min</th>
+                    <th>Max</th>
+                    <th>Mean</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for field, stats in result.cleaning_after.numeric_stats.items %}
+                <tr>
+                    <td>{{ field }}</td>
+                    <td>{{ stats.min|default:'—' }}</td>
+                    <td>{{ stats.max|default:'—' }}</td>
+                    <td>{{ stats.mean|default:'—' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+{% endif %}
+
 {% if result.cleaning_diff %}
-<div class="card mb-4 shadow-sm">
-    <div class="card-header">🔧 Қай өзгерістер болды</div>
-    <div class="card-body p-0">
-        <table class="table table-sm table-hover mb-0 table-result">
+<div class="card mb-4">
+    <div class="card-header">
+        <strong>Қай өзгерістер болды</strong>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-sm table-hover mb-0">
             <thead>
                 <tr>
                     <th>#</th>
                     <th>Жол</th>
-                    <th>Өріc</th>
+                    <th>Өріс</th>
                     <th>До</th>
                     <th>После</th>
                     <th>Ескерту</th>
@@ -74,8 +131,8 @@
                     <td>{{ forloop.counter }}</td>
                     <td>{{ item.row|default:'—' }}</td>
                     <td>{{ item.field|default:item.object }}</td>
-                    <td><code>"{{ item.before|default:'—' }}"</code></td>
-                    <td><code>"{{ item.after|default:'—' }}"</code></td>
+                    <td>{{ item.before|default:'—' }}</td>
+                    <td>{{ item.after|default:'—' }}</td>
                     <td>{{ item.note }}</td>
                 </tr>
                 {% endfor %}
@@ -85,48 +142,54 @@
 </div>
 {% endif %}
 
-<!-- ── Жалпы статистика карточкалары ── -->
 <div class="row g-3 mb-4">
-
     {% if result.row_count is not None %}
     <div class="col-sm-6 col-md-3">
-        <div class="card stat-card h-100 p-3">
-            <div class="text-muted small">Жол саны</div>
-            <div class="fs-3 fw-bold text-primary">{{ result.row_count }}</div>
+        <div class="card">
+            <div class="card-body">
+                <div class="text-muted small">Жол саны</div>
+                <div class="fs-4 fw-bold">{{ result.row_count }}</div>
+            </div>
         </div>
     </div>
     <div class="col-sm-6 col-md-3">
-        <div class="card stat-card h-100 p-3">
-            <div class="text-muted small">Баған саны</div>
-            <div class="fs-3 fw-bold text-primary">{{ result.column_count }}</div>
+        <div class="card">
+            <div class="card-body">
+                <div class="text-muted small">Баған саны</div>
+                <div class="fs-4 fw-bold">{{ result.column_count }}</div>
+            </div>
         </div>
     </div>
     {% endif %}
 
     {% if result.total_nulls is not None %}
     <div class="col-sm-6 col-md-3">
-        <div class="card stat-card danger h-100 p-3">
-            <div class="text-muted small">Жалпы null саны</div>
-            <div class="fs-3 fw-bold text-danger">{{ result.total_nulls }}</div>
+        <div class="card">
+            <div class="card-body">
+                <div class="text-muted small">Null саны</div>
+                <div class="fs-4 fw-bold text-danger">{{ result.total_nulls }}</div>
+            </div>
         </div>
     </div>
     {% endif %}
 
     {% if result.processing_time is not None %}
     <div class="col-sm-6 col-md-3">
-        <div class="card stat-card success h-100 p-3">
-            <div class="text-muted small">Өңдеу уақыты</div>
-            <div class="fs-3 fw-bold text-success">{{ result.processing_time }} сек</div>
+        <div class="card">
+            <div class="card-body">
+                <div class="text-muted small">Өңдеу уақыты</div>
+                <div class="fs-4 fw-bold text-success">{{ result.processing_time }} сек</div>
+            </div>
         </div>
     </div>
     {% endif %}
-
 </div>
 
-<!-- ── Баған атаулары ── -->
 {% if result.column_names %}
-<div class="card mb-4 shadow-sm">
-    <div class="card-header">📋 Баған атаулары</div>
+<div class="card mb-4">
+    <div class="card-header">
+        <strong>Баған атаулары</strong>
+    </div>
     <div class="card-body">
         {% for col in result.column_names %}
         <span class="badge bg-light text-dark border me-1 mb-1">{{ col }}</span>
@@ -135,18 +198,22 @@
 </div>
 {% endif %}
 
-<!-- ── Null мәндер кестесі ── -->
 {% if result.null_counts %}
-<div class="card mb-4 shadow-sm">
-    <div class="card-header">🔴 Бос мәндер (null) статистикасы</div>
-    <div class="card-body p-0">
-        <table class="table table-sm table-hover mb-0 table-result">
+<div class="card mb-4">
+    <div class="card-header">
+        <strong>Бос мәндер (null) статистикасы</strong>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-sm table-hover mb-0">
             <thead>
-                <tr><th>Баған</th><th>Null саны</th></tr>
+                <tr>
+                    <th>Баған</th>
+                    <th>Null саны</th>
+                </tr>
             </thead>
             <tbody>
                 {% for col, cnt in result.null_counts.items %}
-                <tr class="{% if cnt > 0 %}table-warning{% endif %}">
+                <tr {% if cnt > 0 %}class="table-warning"{% endif %}>
                     <td>{{ col }}</td>
                     <td>{{ cnt }}</td>
                 </tr>
@@ -157,14 +224,20 @@
 </div>
 {% endif %}
 
-<!-- ── Сандық статистика кестесі ── -->
 {% if result.numeric_stats %}
-<div class="card mb-4 shadow-sm">
-    <div class="card-header">📈 Сандық бағандар статистикасы</div>
-    <div class="card-body p-0">
-        <table class="table table-sm table-hover mb-0 table-result">
+<div class="card mb-4">
+    <div class="card-header">
+        <strong>Сандық бағандар статистикасы</strong>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-sm table-hover mb-0">
             <thead>
-                <tr><th>Баған</th><th>Min</th><th>Max</th><th>Орташа (Mean)</th></tr>
+                <tr>
+                    <th>Баған</th>
+                    <th>Min</th>
+                    <th>Max</th>
+                    <th>Орташа (Mean)</th>
+                </tr>
             </thead>
             <tbody>
                 {% for col, s in result.numeric_stats.stats.items %}
@@ -178,25 +251,30 @@
             </tbody>
         </table>
     </div>
-    <!-- Диаграмма: сандық бағандар үшін bar chart -->
-    <div class="card-body">
-        <canvas id="statsChart" height="80"></canvas>
-    </div>
 </div>
 {% endif %}
 
-<!-- ── Top-N мәндер ── -->
 {% if result.top_values %}
-<div class="card mb-4 shadow-sm">
-    <div class="card-header">🏆 Ең жиі кездесетін мәндер (Top-N)</div>
+<div class="card mb-4">
+    <div class="card-header">
+        <strong>Ең жиі кездесетін мәндер (Top-N)</strong>
+    </div>
     <div class="card-body">
         {% for col, items in result.top_values.top_values.items %}
-        <h6 class="mt-2">{{ col }}</h6>
-        <table class="table table-sm table-bordered table-result">
-            <thead><tr><th>Мән</th><th>Саны</th></tr></thead>
+        <h6 class="mt-3 mb-2"><strong>{{ col }}</strong></h6>
+        <table class="table table-sm table-bordered mb-0">
+            <thead>
+                <tr>
+                    <th>Мән</th>
+                    <th>Саны</th>
+                </tr>
+            </thead>
             <tbody>
                 {% for item in items %}
-                <tr><td>{{ item.value }}</td><td>{{ item.count }}</td></tr>
+                <tr>
+                    <td>{{ item.value }}</td>
+                    <td>{{ item.count }}</td>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>
@@ -208,34 +286,8 @@
 {% endif %} {# end if not error #}
 
 <div class="mt-3">
-    <a href="{% url 'process' file_record.pk %}" class="btn btn-outline-primary me-2">↺ Қайта өңдеу</a>
-    <a href="{% url 'index' %}" class="btn btn-outline-secondary">← Бас бет</a>
+    <a href="{% url 'process' file_record.pk %}" class="btn btn-outline-primary me-2">Қайта өңдеу</a>
+    <a href="{% url 'index' %}" class="btn btn-outline-secondary">Бас бет</a>
 </div>
 
-{% endblock %}
-
-{% block extra_js %}
-{% if result.numeric_stats %}
-<script>
-// Chart.js — сандық бағандар үшін bar chart
-const statsData = {{ stats_json|safe }};
-const labels = Object.keys(statsData.stats || {});
-const minData  = labels.map(k => statsData.stats[k].min);
-const maxData  = labels.map(k => statsData.stats[k].max);
-const meanData = labels.map(k => statsData.stats[k].mean);
-
-new Chart(document.getElementById('statsChart'), {
-    type: 'bar',
-    data: {
-        labels: labels,
-        datasets: [
-            { label: 'Min',    data: minData,  backgroundColor: 'rgba(13,110,253,0.5)' },
-            { label: 'Max',    data: maxData,  backgroundColor: 'rgba(220,53,69,0.5)' },
-            { label: 'Орташа', data: meanData, backgroundColor: 'rgba(25,135,84,0.5)' },
-        ]
-    },
-    options: { responsive: true, plugins: { legend: { position: 'top' } } }
-});
-</script>
-{% endif %}
 {% endblock %}

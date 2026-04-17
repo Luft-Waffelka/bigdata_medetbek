@@ -38,13 +38,20 @@ def get_shape(df: pd.DataFrame) -> dict:
         3. Нәтижені dict ретінде қайтарыңыз.
     """
     # ▼▼▼ КОДТЫ ОСЫДАН БАСТАҢЫЗ ▼▼▼
-
-    row_count, column_count = df.shape
-    return {
-        'row_count': int(row_count),
-        'column_count': int(column_count),
-        'column_names': df.columns.tolist(),
-    }
+    try:
+        row_count, column_count = df.shape
+        return {
+            'row_count': int(row_count),
+            'column_count': int(column_count),
+            'column_names': list(df.columns),  # Гарантирует список, не tuple
+        }
+    except Exception as e:
+        print(f"⚠️ get_shape() қатесі: {e}")
+        return {
+            'row_count': 0,
+            'column_count': 0,
+            'column_names': [],
+        }
 
     # ▲▲▲ КОДТЫ ОСЫМЕН АЯҚТАҢЫЗ ▲▲▲
 
@@ -77,13 +84,17 @@ def get_null_info(df: pd.DataFrame) -> dict:
     # ▼▼▼ КОДТЫ ОСЫДАН БАСТАҢЫЗ ▼▼▼
 
     null_series = df.isnull().sum()
-    null_counts = null_series.to_dict()
+    null_counts = {col: int(count) for col, count in null_series.to_dict().items()}
     total_nulls = int(null_series.sum())
     row_count = len(df)
-    null_percent = {
-        col: round((count / row_count) * 100, 2) if row_count > 0 else 0.0
-        for col, count in null_counts.items()
-    }
+    
+    null_percent = {}
+    for col, count in null_counts.items():
+        if row_count > 0:
+            null_percent[col] = round((count / row_count) * 100, 2)
+        else:
+            null_percent[col] = 0.0
+    
     return {
         'null_counts': null_counts,
         'total_nulls': total_nulls,
@@ -122,22 +133,33 @@ def get_numeric_stats(df: pd.DataFrame) -> dict:
             ...
     """
     # ▼▼▼ КОДТЫ ОСЫДАН БАСТАҢЫЗ ▼▼▼
-
-    numeric_df = df.select_dtypes(include='number')
-    stats = {}
-    for col in numeric_df.columns:
-        col_min = numeric_df[col].min()
-        col_max = numeric_df[col].max()
-        col_mean = numeric_df[col].mean()
-        stats[col] = {
-            'min': round(float(col_min), 2) if pd.notna(col_min) else None,
-            'max': round(float(col_max), 2) if pd.notna(col_max) else None,
-            'mean': round(float(col_mean), 2) if pd.notna(col_mean) else None,
+    try:
+        numeric_df = df.select_dtypes(include='number')
+        stats = {}
+        for col in numeric_df.columns:
+            try:
+                col_min = numeric_df[col].min()
+                col_max = numeric_df[col].max()
+                col_mean = numeric_df[col].mean()
+                stats[col] = {
+                    'min': round(float(col_min), 2) if pd.notna(col_min) else None,
+                    'max': round(float(col_max), 2) if pd.notna(col_max) else None,
+                    'mean': round(float(col_mean), 2) if pd.notna(col_mean) else None,
+                }
+            except Exception as e:
+                print(f"⚠️ {col} статистикасы есептелмеді: {e}")
+                stats[col] = {'min': None, 'max': None, 'mean': None}
+        
+        return {
+            'stats': stats,
+            'numeric_columns': list(numeric_df.columns),  # Гарантирует список
         }
-    return {
-        'stats': stats,
-        'numeric_columns': numeric_df.columns.tolist(),
-    }
+    except Exception as e:
+        print(f"⚠️ get_numeric_stats() қатесі: {e}")
+        return {
+            'stats': {},
+            'numeric_columns': [],
+        }
 
     # ▲▲▲ КОДТЫ ОСЫМЕН АЯҚТАҢЫЗ ▲▲▲
 
@@ -175,17 +197,35 @@ def get_top_values(df: pd.DataFrame, top_n: int = 5) -> dict:
         top_n — ең жиі мәндер саны (default: 5)
     """
     # ▼▼▼ КОДТЫ ОСЫДАН БАСТАҢЫЗ ▼▼▼
-
-    top_values = {}
-    for col in df.columns:
-        counts = df[col].value_counts(dropna=False).head(top_n)
-        top_values[col] = [
-            {'value': idx, 'count': int(count)}
-            for idx, count in counts.items()
-        ]
-    return {
-        'top_values': top_values,
-    }
+    try:
+        top_n = int(top_n) if top_n else 5
+        top_n = max(1, min(top_n, 100))  # Ограничиваем 1-100
+        
+        top_values = {}
+        for col in df.columns:
+            try:
+                counts = df[col].value_counts(dropna=False).head(top_n)
+                top_values[col] = []
+                for idx, count in counts.items():
+                    try:
+                        top_values[col].append({
+                            'value': str(idx) if pd.isna(idx) else idx,  # Конвертируем NaN в строку
+                            'count': int(count)
+                        })
+                    except Exception as e:
+                        print(f"⚠️ {col} бағанының мәні өңделмеді: {e}")
+            except Exception as e:
+                print(f"⚠️ {col} top_values есептелмеді: {e}")
+                top_values[col] = []
+        
+        return {
+            'top_values': top_values,
+        }
+    except Exception as e:
+        print(f"⚠️ get_top_values() қатесі: {e}")
+        return {
+            'top_values': {},
+        }
 
     # ▲▲▲ КОДТЫ ОСЫМЕН АЯҚТАҢЫЗ ▲▲▲
 
@@ -214,27 +254,45 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
         pd.DataFrame — тазаланған DataFrame
     """
     # ▼▼▼ КОДТЫ ОСЫДАН БАСТАҢЫЗ ▼▼▼
+    try:
+        cleaned_df = df.copy()
 
-    cleaned_df = df.copy()
+        # 1) Баған атауларын кіші әріпке келтіру
+        try:
+            cleaned_df.columns = cleaned_df.columns.str.lower()
+        except (AttributeError, TypeError):
+            # Если columns не имеет метода str.lower(), просто конвертируем в список и обратно
+            cleaned_df.columns = [str(col).lower() for col in cleaned_df.columns]
 
-    # 1) Баған атауларын кіші әріпке келтіру
-    cleaned_df.columns = cleaned_df.columns.str.lower()
+        # 2) Қайталанатын жолдарды жою
+        cleaned_df = cleaned_df.drop_duplicates().reset_index(drop=True)
 
-    # 2) Қайталанатын жолдарды жою
-    cleaned_df = cleaned_df.drop_duplicates().reset_index(drop=True)
+        # 3) Мәтіндік бағандардағы айналасындағы бос орындарды жою
+        text_columns = list(cleaned_df.select_dtypes(include=['object', 'string']).columns)
+        for col in text_columns:
+            try:
+                cleaned_df[col] = cleaned_df[col].astype('string').str.strip()
+            except (AttributeError, TypeError):
+                # Если функция не работает, просто пропускаем
+                pass
 
-    # 3) Мәтіндік бағандардағы айналасындағы бос орындарды жою
-    text_columns = cleaned_df.select_dtypes(include=['object', 'string']).columns
-    for col in text_columns:
-        cleaned_df[col] = cleaned_df[col].astype('string').str.strip()
+        # 4) Сандық бағандардағы бос мәндерді бағандық орташа мәнмен толтыру
+        numeric_columns = list(cleaned_df.select_dtypes(include='number').columns)
+        for col in numeric_columns:
+            if cleaned_df[col].isna().any():
+                try:
+                    mean_value = float(cleaned_df[col].mean())
+                    if pd.notna(mean_value):
+                        cleaned_df[col] = cleaned_df[col].fillna(mean_value)
+                except (TypeError, ValueError):
+                    # Если не можем вычислить среднее, пропускаем
+                    pass
 
-    # 4) Сандық бағандардағы бос мәндерді бағандық орташа мәнмен толтыру
-    numeric_columns = cleaned_df.select_dtypes(include='number').columns
-    for col in numeric_columns:
-        if cleaned_df[col].isna().any():
-            mean_value = cleaned_df[col].mean()
-            cleaned_df[col] = cleaned_df[col].fillna(mean_value)
-
-    return cleaned_df
+        return cleaned_df
+    
+    except Exception as e:
+        # Если что-то совсем не сработает, просто вернём оригинальный DataFrame
+        print(f"⚠️ ДИАГНОСТИКА: clean_data() ішінде қате: {e}")
+        return df.copy()
 
     # ▲▲▲ КОДТЫ ОСЫМЕН АЯҚТАҢЫЗ ▲▲▲

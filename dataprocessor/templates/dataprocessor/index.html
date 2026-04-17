@@ -6,9 +6,9 @@
 <div class="row justify-content-center">
     <div class="col-md-7">
 
-        <div class="card shadow-sm">
+        <div class="card">
             <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">📁 Файл жүктеу</h5>
+                <h5 class="mb-0">Файл жүктеу</h5>
             </div>
             <div class="card-body">
                 <p class="text-muted">
@@ -29,37 +29,34 @@
                         {% endfor %}
                     </div>
 
-                    <!-- Прогресс жолағы (жүктеу кезінде) -->
                     <div class="progress mb-3 d-none" id="upload-progress">
-                        <div class="progress-bar progress-bar-striped progress-bar-animated"
-                             style="width: 100%">Жүктелуде...</div>
+                        <div class="progress-bar" style="width: 100%">Жүктелуде...</div>
                     </div>
 
                     <button type="submit" class="btn btn-primary w-100" id="submit-btn">
-                        ⬆ Жүктеу
+                        Жүктеу
                     </button>
                 </form>
             </div>
         </div>
 
-        <!-- Соңғы жүктелген файлдар -->
         {% if recent_files %}
-        <div class="card shadow-sm mt-4">
-            <div class="card-header">🕐 Соңғы жүктелгендер</div>
+        <div class="card mt-4">
+            <div class="card-header">Соңғы жүктелгендер</div>
             <ul class="list-group list-group-flush">
                 {% for f in recent_files %}
                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <span>
+                    <div>
                         <strong>{{ f.original_name }}</strong>
-                        <span class="badge bg-secondary ms-1">{{ f.file_type|upper }}</span>
-                    </span>
-                    <span>
+                        <span class="badge bg-secondary ms-2">{{ f.file_type|upper }}</span>
+                    </div>
+                    <div>
                         {% if f.is_processed %}
-                            <a href="{% url 'results' f.pk %}" class="btn btn-sm btn-outline-success">Нәтиже</a>
+                            <a href="{% url 'results' f.pk %}" class="btn btn-sm btn-success">Нәтиже</a>
                         {% else %}
-                            <a href="{% url 'process' f.pk %}" class="btn btn-sm btn-outline-primary">Өңдеу</a>
+                            <a href="{% url 'process' f.pk %}" class="btn btn-sm btn-primary">Өңдеу</a>
                         {% endif %}
-                    </span>
+                    </div>
                 </li>
                 {% endfor %}
             </ul>
